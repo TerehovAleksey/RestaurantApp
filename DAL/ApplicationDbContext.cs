@@ -47,6 +47,7 @@ namespace DAL
                     userManager.AddToRoleAsync(user, Domain.UserRoles.ADMIN).GetAwaiter().GetResult();
                     userManager.AddToRoleAsync(user, Domain.UserRoles.USER).GetAwaiter().GetResult();
                 }
+                userManager.Dispose();
 
                 #endregion
             }
@@ -69,7 +70,9 @@ namespace DAL
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            //организация отметки об удалении вместо физического удаления из базы данных
+
+            #region организация отметки об удалении вместо физического удаления из базы данных
+
             foreach (var entry in ChangeTracker.Entries().Where(e => e.State == EntityState.Deleted))
             {
                 if (entry.Entity is IMarkDeleted mark)
@@ -77,7 +80,9 @@ namespace DAL
                     mark.IsDeleted = true;
                     entry.State = EntityState.Modified;
                 }
-            }
+            } 
+
+            #endregion
 
             return base.SaveChangesAsync(cancellationToken);
         }
